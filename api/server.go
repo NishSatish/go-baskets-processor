@@ -3,6 +3,7 @@ package api
 import (
 	_ "github.com/lib/pq"
 	"go-basket-processor/pkg/db"
+	v1 "go-basket-processor/pkg/service/v1"
 	"net/http"
 )
 
@@ -14,11 +15,13 @@ func StartServer() {
 // startHttpServer for some reason you need to write the name of the func in the comment
 // don't start it with caps if you don't want to export it
 func startHttpServer() {
-	db.Connect()
+	dbObj := db.Connect()
+
+	v1Service := v1.NewV1Service(db.NewDBService(dbObj))
 
 	server := &http.Server{
 		Addr:    ":8080",
-		Handler: getRouter(),
+		Handler: getRouter(v1Service),
 	}
 
 	err := server.ListenAndServe()
